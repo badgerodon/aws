@@ -242,7 +242,7 @@ authorization method generates the authorization header value.
 func (s *V4Signer) authorization(header http.Header, t time.Time, signature string) string {
 	w := new(bytes.Buffer)
 	fmt.Fprint(w, "AWS4-HMAC-SHA256 ")
-	fmt.Fprintf(w, "Credential=%s/%s, ", s.auth.SecretAccessKey, s.credentialScope(t))
+	fmt.Fprintf(w, "Credential=%s/%s, ", s.auth.AccessKeyID, s.credentialScope(t))
 	fmt.Fprintf(w, "SignedHeaders=%s, ", s.signedHeaders(header))
 	fmt.Fprintf(w, "Signature=%s", signature)
 	return w.String()

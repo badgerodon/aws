@@ -1,7 +1,7 @@
 package sqs
 
 import (
-	"github.com/badgerodon/aws/sign/v4"
+	"github.com/badgerodon/aws"
 	"net/http"
 	"net/url"
 )
@@ -29,6 +29,6 @@ func Get(endpoint, params []Parameter) error {
 	if err != nil {
 		return err
 	}
-	v4.Sign(req)
+	//v4.Sign(req)
 	return nil
 }
