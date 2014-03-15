@@ -34,11 +34,10 @@ func TestV4SignerBuildStringToSign(t *testing.T) {
 		"host",
 		"us-east-1",
 	)
-	creq := s.canonicalRequest(req)
 	tm, _ := time.Parse(time.RFC3339, "2011-09-09T23:36:00Z")
 
 	expected := "AWS4-HMAC-SHA256\n20110909T233600Z\n20110909/us-east-1/host/aws4_request\ne25f777ba161a0f1baf778a87faf057187cf5987f17953320e3ca399feb5f00d"
-	result := s.stringToSign(tm, creq)
+	result := s.stringToSign(tm, req)
 
 	if result != expected {
 		t.Errorf("error building string to sign, expected: \n%s, got: \n%s", expected, result)
