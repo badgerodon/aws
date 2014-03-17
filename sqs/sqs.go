@@ -51,7 +51,7 @@ func (c *Client) Get(url string, params Parameters, dst interface{}) error {
 		return err
 	}
 	aws.NewV4Signer(c.Auth, "sqs", c.RegionName).Sign(req)
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := aws.DefaultHTTPClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -130,7 +130,141 @@ func (c *Client) CreateQueue(name string, attributes map[string]string) (CreateQ
 	return res, c.Get("", params, &res)
 }
 
-func (c *Client) SetQueueAttributes(url string, attributes map[string]string) error {
+func (c *Client) DeleteMessage(url string, receiptHandle string) (DeleteMessageResponse, error) {
+	params := map[string]string{
+		"Action":        "DeleteMessage",
+		"ReceiptHandle": receiptHandle,
+	}
+	var res DeleteMessageResponse
+	return res, c.Get(url, params, &res)
+}
+
+func (c *Client) DeleteMessageBatch(url string, requests []DeleteMessageBatchRequest) (DeleteMessageBatchResponse, error) {
+	params := map[string]string{
+		"Action": "DeleteMessageBatch",
+	}
+	i := 1
+	for _, req := range requests {
+		params[fmt.Sprint("DeleteMessageBatchRequestEntry.", i, ".Id")] = req.Id
+		params[fmt.Sprint("DeleteMessageBatchRequestEntry.", i, ".ReceiptHandle")] = req.ReceiptHandle
+		i++
+	}
+	var res DeleteMessageBatchResponse
+	return res, c.Get(url, params, &res)
+}
+
+func (c *Client) DeleteQueue(url string) (DeleteQueueResponse, error) {
+	params := map[string]string{
+		"Action": "DeleteQueue",
+	}
+	var res DeleteQueueResponse
+	return res, c.Get(url, params, &res)
+}
+
+func (c *Client) GetQueueAttributes(url string, attributeNames []string) (GetQueueAttributesResponse, error) {
+	params := map[string]string{
+		"Action": "GetQueueAttributes",
+	}
+	i := 1
+	for _, a := range attributeNames {
+		params[fmt.Sprint("AttributeName.", i)] = a
+		i++
+	}
+	var res GetQueueAttributesResponse
+	return res, c.Get(url, params, &res)
+}
+
+func (c *Client) GetQueueUrl(queueName string, queueOwnerAWSAccountId string) (GetQueueUrlResponse, error) {
+	params := map[string]string{
+		"Action":    "GetQueueUrl",
+		"QueueName": queueName,
+	}
+	if queueOwnerAWSAccountId != "" {
+		params["QueueOwnerAWSAccountId"] = queueOwnerAWSAccountId
+	}
+	var res GetQueueUrlResponse
+	return res, c.Get("", params, &res)
+}
+
+func (c *Client) ListDeadLetterSourceQueues(url string) (ListDeadLetterSourceQueuesResponse, error) {
+	params := map[string]string{
+		"Action":   "ListDeadLetterSourceQueues",
+		"QueueUrl": url,
+	}
+	var res ListDeadLetterSourceQueuesResponse
+	return res, c.Get(url, params, &res)
+}
+
+func (c *Client) ListQueues(queueNamePrefix string) (ListQueuesResponse, error) {
+	params := map[string]string{
+		"Action": "ListQueues",
+	}
+	if queueNamePrefix != "" {
+		params["QueueNamePrefix"] = queueNamePrefix
+	}
+	var res ListQueuesResponse
+	return res, c.Get("", params, &res)
+}
+
+func (c *Client) ReceiveMessage(url string, req ReceiveMessageRequest) (ReceiveMessageResponse, error) {
+	params := map[string]string{
+		"Action": "ReceiveMessage",
+	}
+	if req.MaxNumberOfMessages > 0 {
+		params["MaxNumberOfMessages"] = fmt.Sprint(req.MaxNumberOfMessages)
+	}
+	if req.VisibilityTimeout > 0 {
+		params["VisibilityTimeout"] = fmt.Sprint(req.VisibilityTimeout)
+	}
+	if req.WaitTimeSeconds > 0 {
+		params["WaitTimeSeconds"] = fmt.Sprint(req.WaitTimeSeconds)
+	}
+	i := 1
+	for _, a := range req.Attributes {
+		params[fmt.Sprint("AttributeName.", i)] = a
+		i++
+	}
+	var res ReceiveMessageResponse
+	return res, c.Get(url, params, &res)
+}
+
+func (c *Client) RemovePermission(url string, label string) (RemovePermissionResponse, error) {
+	params := map[string]string{
+		"Action": "RemovePermission",
+		"Label":  label,
+	}
+	var res RemovePermissionResponse
+	return res, c.Get(url, params, &res)
+}
+
+func (c *Client) SendMessage(url string, body string, delaySeconds int) (SendMessageResponse, error) {
+	params := map[string]string{
+		"Action":      "SendMessage",
+		"MessageBody": body,
+	}
+	if delaySeconds > 0 {
+		params["DelaySeconds"] = fmt.Sprint(delaySeconds)
+	}
+	var res SendMessageResponse
+	return res, c.Get(url, params, &res)
+}
+
+func (c *Client) SendMessageBatch(url string, requests []SendMessageBatchRequest) (SendMessageBatchResponse, error) {
+	params := map[string]string{
+		"Action": "SendMessageBatch",
+	}
+	i := 1
+	for _, req := range requests {
+		params[fmt.Sprint("SendMessageBatchRequestEntry.", i, ".Id")] = req.Id
+		params[fmt.Sprint("SendMessageBatchRequestEntry.", i, ".MessageBody")] = req.MessageBody
+		params[fmt.Sprint("SendMessageBatchRequestEntry.", i, ".DelaySeconds")] = fmt.Sprint(req.DelaySeconds)
+		i++
+	}
+	var res SendMessageBatchResponse
+	return res, c.Get(url, params, &res)
+}
+
+func (c *Client) SetQueueAttributes(url string, attributes map[string]string) (SetQueueAttributesResponse, error) {
 	params := map[string]string{
 		"Action": "SetQueueAttributes",
 	}
@@ -140,5 +274,6 @@ func (c *Client) SetQueueAttributes(url string, attributes map[string]string) er
 		params[fmt.Sprint("Attributes.", i, ".Value")] = v
 		i++
 	}
-	return c.Get(url, params, nil)
+	var res SetQueueAttributesResponse
+	return res, c.Get(url, params, &res)
 }
