@@ -2,11 +2,9 @@ package s3
 
 import (
 	"fmt"
-	"github.com/badgerodon/aws"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
 type (
@@ -52,7 +50,7 @@ func (req GetObjectRequest) Encode(h *http.Request) {
 	if req.IfNoneMatch != "" {
 		h.Header.Set("If-None-Match", req.IfNoneMatch)
 	}
-	h.URL.Path = "/" + req.Bucket + "/" + strings.Replace(aws.Encode(req.Key), "%2F", "/", -1)
+	h.URL.Path = "/" + req.Bucket + "/" + req.Key
 }
 
 func (res *GetObjectResponse) Decode(h *http.Response) error {

@@ -98,7 +98,7 @@ func (s *V4Signer) canonicalURI(u *url.URL) string {
 	if canonicalPath != "/" && slash {
 		canonicalPath += "/"
 	}
-	return canonicalPath
+	return strings.Replace(Encode(canonicalPath), "%2F", "/", -1)
 }
 
 func (s *V4Signer) canonicalQueryString(u *url.URL) string {
