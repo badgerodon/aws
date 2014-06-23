@@ -18,13 +18,15 @@ type (
 		Prefix       string
 	}
 	ListBucketResponse struct {
-		Name        string            `xml:"Name"`
-		Prefix      string            `xml:"Prefix"`
-		Marker      string            `xml:"Marker"`
-		NextMarker  string            `xml:"NextMarker"`
-		MaxKeys     int               `xml:"MaxKeys"`
-		IsTruncated bool              `xml:"IsTruncated"`
-		Contents    []ListBucketEntry `xml:"Contents"`
+		Name           string            `xml:"Name"`
+		Prefix         string            `xml:"Prefix"`
+		Delimiter      string            `xml:"Delimiter"`
+		Marker         string            `xml:"Marker"`
+		NextMarker     string            `xml:"NextMarker"`
+		MaxKeys        int               `xml:"MaxKeys"`
+		IsTruncated    bool              `xml:"IsTruncated"`
+		Contents       []ListBucketEntry `xml:"Contents"`
+		CommonPrefixes []string          `xml:"CommonPrefixes>Prefix"`
 	}
 	ListBucketEntry struct {
 		Key          string    `xml:"Key"`
